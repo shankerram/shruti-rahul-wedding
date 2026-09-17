@@ -1,0 +1,273 @@
+/* ------------------------------------------------------------------
+   Banana-leaf wedding invitation
+   The whole scene is sized from --w, the width of the (square) card.
+   ------------------------------------------------------------------ */
+:root {
+  --w: min(88vw, 58vh);
+  --leaf-top: 4%;
+  --leaf-h: 92%;
+  --flap-w: 86%;
+
+  --paper: #efe7d8;
+  --paper-2: #e6dcc8;
+  --ink: #8d1a1f;
+  --ink-soft: #6b4a3a;
+
+  --t-flap: 1.15s;
+  --ease-fold: cubic-bezier(.45, .05, .2, 1);
+}
+@media (min-aspect-ratio: 5/4) {
+  :root { --w: min(38vw, 66vh); --flap-w: 80%; }
+}
+@media (min-aspect-ratio: 5/4) and (max-height: 520px) {
+  :root { --w: min(38vw, 72vh); }
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+  color: var(--ink-soft);
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(120% 100% at 50% 40%, rgba(255, 252, 244, .9), rgba(255, 252, 244, 0) 60%),
+    radial-gradient(90% 80% at 50% 60%, rgba(0, 0, 0, 0) 55%, rgba(80, 60, 30, .16) 100%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='220' height='220' filter='url(%23n)' opacity='.16'/></svg>");
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.scene {
+  position: fixed; inset: 0;
+  display: grid;
+  grid-template-rows: 1fr auto auto;
+  justify-items: center;
+  align-items: center;
+  padding: 3vh 0 2vh;
+  gap: 1.2vh;
+}
+
+/* ---------- stage: perspective + entrance ---------- */
+.stage {
+  position: relative;
+  width: var(--w);
+  height: var(--w);
+  perspective: calc(var(--w) * 3.2);
+  perspective-origin: 50% 40%;
+  opacity: 0;
+  transform: translateY(4vh) scale(.94);
+  animation: arrive 1.3s cubic-bezier(.2, .8, .2, 1) .15s forwards;
+}
+@keyframes arrive { to { opacity: 1; transform: none; } }
+
+.shadow {
+  position: absolute; left: 50%; top: 54%;
+  width: 104%; height: 92%;
+  transform: translate(-50%, -50%);
+  border-radius: 50% / 40%;
+  background: radial-gradient(ellipse at center, rgba(40, 30, 10, .42), rgba(40, 30, 10, .18) 55%, rgba(40, 30, 10, 0) 78%);
+  filter: blur(calc(var(--w) * .035));
+  transition: width var(--t-flap) var(--ease-fold) .35s, opacity .8s;
+  pointer-events: none;
+}
+.open .shadow { width: 250%; opacity: .75; }
+
+/* ---------- wrap: the 3D group ---------- */
+.wrap {
+  position: absolute; inset: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(5deg);
+  transition: transform 1s var(--ease-fold);
+  cursor: pointer;
+  outline: none;
+}
+.wrap:focus-visible { outline: 3px solid rgba(141, 26, 31, .5); outline-offset: 10px; }
+.open .wrap { transform: rotateX(3deg); cursor: default; }
+
+/* ---------- leaf ---------- */
+.leaf {
+  position: absolute;
+  left: 0; right: 0;
+  top: var(--leaf-top); height: var(--leaf-h);
+  transform-style: preserve-3d;
+}
+.base {
+  position: absolute; inset: 0;
+  background: url("assets/base.jpg") center / cover no-repeat;
+  border-radius: 2px 6px 3px 6px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .15);
+  transform: translateZ(0);
+}
+.flap {
+  position: absolute;
+  top: 0; height: 100%;
+  width: var(--flap-w);
+  transform-style: preserve-3d;
+  backface-visibility: visible;
+  will-change: transform;
+  transition: transform var(--t-flap) var(--ease-fold);
+}
+.flap img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  display: block;
+  object-fit: fill;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .28));
+  pointer-events: none;
+}
+/* left lobe: lies outside on the left when open, hinged on the card's left edge */
+.flap-l {
+  left: calc(-1 * var(--flap-w));
+  transform-origin: 100% 50%;
+  transform: translateZ(20px) rotateY(180deg);
+  transition-delay: .55s;               /* closing: it lands last, on top */
+}
+/* right lobe: lies outside on the right when open, hinged on the card's right edge */
+.flap-r {
+  left: 100%;
+  transform-origin: 0 50%;
+  transform: translateZ(14px) rotateY(-180deg);
+  transition-delay: 0s;
+}
+.open .flap-l { transform: translateZ(20px) rotateY(0deg);  transition-delay: 0s; }
+.open .flap-r { transform: translateZ(14px) rotateY(0deg);  transition-delay: .6s; }
+
+/* slight shading so the folded lobes read as the underside catching less light */
+.flap::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(0, 0, 0, .18), rgba(0, 0, 0, 0) 45%);
+  opacity: 1;
+  transition: opacity var(--t-flap) ease;
+  pointer-events: none;
+  -webkit-mask: url("assets/lobe.webp") center / 100% 100% no-repeat;
+          mask: url("assets/lobe.webp") center / 100% 100% no-repeat;
+}
+.flap-r::after {
+  background: linear-gradient(270deg, rgba(0, 0, 0, .18), rgba(0, 0, 0, 0) 45%);
+  -webkit-mask-image: url("assets/lobe_r.webp");
+          mask-image: url("assets/lobe_r.webp");
+}
+.open .flap::after { opacity: 0; }
+
+/* ---------- card ---------- */
+.card {
+  position: absolute; inset: 0;
+  transform-style: preserve-3d;
+  transform: translateZ(6px);
+  border-radius: 6px;
+  cursor: default;
+}
+.open .card { cursor: pointer; }
+.face {
+  position: absolute; inset: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fbf6ec;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .25), 0 10px 30px -12px rgba(0, 0, 0, .35);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.face img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.face.front { transform: translateZ(1px); }
+.face.back  { transform: rotateY(180deg) translateZ(1px); }
+
+/* ---------- thread ---------- */
+.tie {
+  position: absolute;
+  top: 0; height: 100%;
+  left: -30%; width: 160%;
+  overflow: visible;
+  transform: translateZ(32px);
+  pointer-events: none;
+}
+.tie .hit { fill: transparent; pointer-events: all; cursor: pointer; }
+.open .tie .hit, .untied .tie .hit { pointer-events: none; }
+
+.rope path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+/* stroke widths are in viewBox units (1000 = card width) so the cord scales with the card */
+.rope .rim   { stroke: #5e120c; stroke-width: 13; opacity: .85; }
+.rope .red   { stroke: #c22a1c; stroke-width: 9.5; }
+.rope .twist { stroke: #f3c23a; stroke-width: 3.6; stroke-dasharray: 6 11; opacity: .95; }
+.rope .twist2 { stroke: #8e1c12; stroke-width: 3.2; stroke-dasharray: 5 12; stroke-dashoffset: 8; opacity: .8; }
+.rope.knot .rim { stroke-width: 15; }
+.rope.knot .red { stroke-width: 11; }
+.rope.knot .twist { stroke-dasharray: 4 9; }
+.fray path { stroke: #c22a1c; stroke-width: 2.6; opacity: .9; }
+.fray path:nth-child(1) { stroke: #f3c23a; }
+
+/* the loose ends lie on the table beside the leaf: hidden while tied */
+.loose { opacity: 0; transition: opacity .5s ease; }
+
+/* untie choreography (all timings relative to the click) */
+.bow { transform-box: fill-box; }
+.loop { transform-origin: 470px 470px; transition: transform .55s cubic-bezier(.6, 0, .9, .4), opacity .3s ease .35s; }
+.loop-b { transition-delay: .08s, .4s; }
+.tail  { transform-origin: 470px 470px; transition: transform .6s cubic-bezier(.3, .6, .4, 1) .25s, opacity .35s ease .55s; }
+.knot  { transform-origin: 470px 470px; transition: transform .45s ease .35s, opacity .3s ease .55s; }
+.band  { transition: transform .7s cubic-bezier(.4, .2, .6, 1) .6s, opacity .5s ease .85s; }
+
+.untied .loop   { transform: scale(.04) rotate(-25deg); opacity: 0; }
+.untied .loop-b { transform: scale(.04) rotate(30deg); }
+.untied .tail   { transform: translate(60px, 150px) rotate(-18deg); opacity: 0; }
+.untied .knot   { transform: scale(.2); opacity: 0; }
+.untied .band   { transform: translateY(85px) rotate(1.6deg); opacity: 0; }
+.untied .loose  { opacity: 1; transition-delay: .75s; }
+.open .tie { transform: translateZ(1px); transition: transform 0s linear .1s; }
+
+/* ---------- hint + controls ---------- */
+.hint {
+  font-size: clamp(16px, 2.2vh, 22px);
+  font-style: italic;
+  letter-spacing: .02em;
+  color: var(--ink);
+  opacity: 0;
+  animation: fadein .8s ease 1.4s forwards;
+  transition: opacity .4s ease;
+  min-height: 1.4em;
+  text-align: center;
+  padding: 0 16px;
+}
+@keyframes fadein { to { opacity: .85; } }
+.hint.is-hidden { opacity: 0 !important; }
+
+.controls {
+  display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+  opacity: 0; transform: translateY(6px);
+  transition: opacity .6s ease, transform .6s ease;
+  padding: 0 16px;
+}
+.controls.is-visible { opacity: 1; transform: none; }
+.controls[hidden] { display: none; }
+.btn {
+  font: inherit;
+  font-size: clamp(15px, 2vh, 19px);
+  font-weight: 600;
+  letter-spacing: .04em;
+  color: #fff8ee;
+  background: linear-gradient(180deg, #a5221f, #7f1414);
+  border: 1px solid rgba(255, 220, 160, .45);
+  border-radius: 999px;
+  padding: .55em 1.5em;
+  cursor: pointer;
+  box-shadow: 0 6px 16px -8px rgba(90, 10, 10, .7), inset 0 1px 0 rgba(255, 255, 255, .25);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.btn:hover { transform: translateY(-1px); box-shadow: 0 10px 20px -10px rgba(90, 10, 10, .8), inset 0 1px 0 rgba(255, 255, 255, .25); }
+.btn:active { transform: translateY(0); }
+.btn.ghost {
+  color: var(--ink);
+  background: rgba(255, 255, 255, .35);
+  border-color: rgba(141, 26, 31, .35);
+  box-shadow: none;
+}
+.btn:focus-visible { outline: 3px solid rgba(141, 26, 31, .45); outline-offset: 3px; }
+
+/* ---------- motion preferences ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .stage { animation-duration: .01s; animation-delay: 0s; }
+  .flap, .shadow, .wrap, .loop, .tail, .knot, .band, .loose { transition-duration: .01s !important; transition-delay: 0s !important; }
+  .hint { animation-delay: 0s; animation-duration: .01s; }
+}
