@@ -26,6 +26,26 @@
     later(() => { hint.textContent = text; hint.classList.remove('is-hidden'); }, 420);
   }
 
+  /* ---------- marigold petals ---------- */
+  const petalBox = document.getElementById('petals');
+  const PETAL_COLORS = ['#f0821e', '#ffb32a', '#e8761b', '#ffc93c', '#d8571a', '#ff9c22'];
+  function rainPetals(n) {
+    if (reduced) return;
+    for (let i = 0; i < n; i++) {
+      const p = document.createElement('i');
+      p.className = 'petal';
+      const w = 7 + Math.random() * 11, h = w * (.62 + Math.random() * .32);
+      const dur = 5.5 + Math.random() * 5.5, delay = Math.random() * 2.4;
+      p.style.cssText = `left:${Math.random() * 100}%;width:${w}px;height:${h}px;
+        background:linear-gradient(145deg,${PETAL_COLORS[i % PETAL_COLORS.length]} 20%,${PETAL_COLORS[(i + 3) % PETAL_COLORS.length]});
+        box-shadow:0 1px 4px rgba(90,40,0,.45), inset 0 -2px 3px rgba(140,60,0,.3);
+        --dx:${(Math.random() * 260 - 130).toFixed(0)}px;--rot:${(Math.random() * 900 - 380).toFixed(0)}deg;
+        animation-duration:${dur.toFixed(2)}s;animation-delay:${delay.toFixed(2)}s`;
+      petalBox.appendChild(p);
+      setTimeout(() => p.remove(), (dur + delay) * 1000 + 200);
+    }
+  }
+
   /* ---------- open: untie, then unfold ---------- */
   function open() {
     if (state !== 'closed') return;
@@ -39,6 +59,7 @@
     later(() => {
       state = 'opening';
       scene.classList.add('open');
+      rainPetals(30);
     }, UNTIE_MS);
 
     later(() => {

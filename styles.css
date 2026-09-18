@@ -265,9 +265,24 @@ body {
 }
 .btn:focus-visible { outline: 3px solid rgba(141, 26, 31, .45); outline-offset: 3px; }
 
+/* ---------- marigold petals (rain when the leaf unfolds) ---------- */
+#petals { position: fixed; inset: 0; z-index: 5; pointer-events: none; overflow: hidden; }
+.petal {
+  position: absolute; top: -8vh;
+  border-radius: 52% 52% 46% 46% / 62% 62% 38% 38%;
+  will-change: transform, opacity;
+  animation: fall linear forwards;
+}
+@keyframes fall {
+  0%   { opacity: 0;   transform: translate3d(0, -10vh, 0) rotate(0deg); }
+  8%   { opacity: .95; }
+  100% { opacity: 0;   transform: translate3d(var(--dx, 40px), 112vh, 0) rotate(var(--rot, 540deg)); }
+}
+
 /* ---------- motion preferences ---------- */
 @media (prefers-reduced-motion: reduce) {
   .stage { animation-duration: .01s; animation-delay: 0s; }
   .flap, .shadow, .wrap, .loop, .tail, .knot, .band, .loose { transition-duration: .01s !important; transition-delay: 0s !important; }
   .hint { animation-delay: 0s; animation-duration: .01s; }
+  .petal { display: none; }
 }
