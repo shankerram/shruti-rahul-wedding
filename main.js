@@ -29,21 +29,30 @@
   /* ---------- marigold petals ---------- */
   const petalBox = document.getElementById('petals');
   const PETAL_COLORS = ['#f0821e', '#ffb32a', '#e8761b', '#ffc93c', '#d8571a', '#ff9c22'];
-  function rainPetals(n) {
-    if (reduced) return;
-    for (let i = 0; i < n; i++) {
-      const p = document.createElement('i');
-      p.className = 'petal';
-      const w = 7 + Math.random() * 11, h = w * (.62 + Math.random() * .32);
-      const dur = 5.5 + Math.random() * 5.5, delay = Math.random() * 2.4;
-      p.style.cssText = `left:${Math.random() * 100}%;width:${w}px;height:${h}px;
-        background:linear-gradient(145deg,${PETAL_COLORS[i % PETAL_COLORS.length]} 20%,${PETAL_COLORS[(i + 3) % PETAL_COLORS.length]});
-        box-shadow:0 1px 4px rgba(90,40,0,.45), inset 0 -2px 3px rgba(140,60,0,.3);
-        --dx:${(Math.random() * 260 - 130).toFixed(0)}px;--rot:${(Math.random() * 900 - 380).toFixed(0)}deg;
-        animation-duration:${dur.toFixed(2)}s;animation-delay:${delay.toFixed(2)}s`;
-      petalBox.appendChild(p);
-      setTimeout(() => p.remove(), (dur + delay) * 1000 + 200);
-    }
+  let petalTimer = null;
+  function dropPetal(i, maxDelay) {
+    const p = document.createElement('i');
+    p.className = 'petal';
+    const unit = Math.max(10, Math.min(innerWidth, innerHeight) * 0.016);   // grows with the screen
+    const w = unit * (0.8 + Math.random() * 1.2), h = w * (.62 + Math.random() * .32);
+    const dur = 6 + Math.random() * 6, delay = Math.random() * maxDelay;
+    p.style.cssText = `left:${Math.random() * 100}%;width:${w.toFixed(1)}px;height:${h.toFixed(1)}px;
+      background:linear-gradient(145deg,${PETAL_COLORS[i % PETAL_COLORS.length]} 20%,${PETAL_COLORS[(i + 3) % PETAL_COLORS.length]});
+      box-shadow:0 1px 4px rgba(90,40,0,.45), inset 0 -2px 3px rgba(140,60,0,.3);
+      --dx:${(Math.random() * 260 - 130).toFixed(0)}px;--rot:${(Math.random() * 900 - 380).toFixed(0)}deg;
+      animation-duration:${dur.toFixed(2)}s;animation-delay:${delay.toFixed(2)}s`;
+    petalBox.appendChild(p);
+    setTimeout(() => p.remove(), (dur + delay) * 1000 + 200);
+  }
+  // a burst as the leaf unfolds, then a gentle steady drift for as long as the card is open
+  function startPetals() {
+    if (reduced || petalTimer) return;
+    for (let i = 0; i < 40; i++) dropPetal(i, 2.4);
+    let n = 40;
+    petalTimer = setInterval(() => { if (!document.hidden) dropPetal(n++, 0); }, 380);
+  }
+  function stopPetals() {
+    if (petalTimer) { clearInterval(petalTimer); petalTimer = null; }
   }
 
   /* ---------- open: untie, then unfold ---------- */
@@ -59,7 +68,7 @@
     later(() => {
       state = 'opening';
       scene.classList.add('open');
-      rainPetals(30);
+      startPetals();
     }, UNTIE_MS);
 
     later(() => {
@@ -78,6 +87,7 @@
     controls.classList.remove('is-visible');
     setHint('');
     if (showingBack) flip(true);         // put card 1 on top before wrapping
+    stopPetals();
     scene.classList.remove('open');
     later(() => {
       controls.hidden = true;
@@ -152,5 +162,6 @@
     controls.hidden = false;
     controls.classList.add('is-visible');
     hint.textContent = 'Tap the card to turn it over';
+    startPetals();
   }
 })();
