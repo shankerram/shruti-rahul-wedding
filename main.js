@@ -13,9 +13,8 @@
   const backImg = card.querySelector('.face.back img');
 
   // the invitation's pages, listed in the hidden .pages block of each route's index.html
-  const pagesEl = document.querySelector('.pages');
-  const SWAY = pagesEl.hasAttribute('data-sway');      // this invitation's garlands dangle
-  const pages = [...pagesEl.querySelectorAll('img')].map(img => ({ src: img.getAttribute('src'), alt: img.alt }));
+  // a page marked data-sway has its garlands dangling over a copy with them painted out
+  const pages = [...document.querySelectorAll('.pages img')].map(img => ({ src: img.getAttribute('src'), alt: img.alt, sway: img.hasAttribute('data-sway') }));
   const stillOf = (src) => src.replace(/\.jpg$/, '-still.jpg');   // the page with its garlands painted out
   const maskOf = (src) => src.replace(/\.jpg$/, '-mask.png');     // the garlands alone
   const N = pages.length;
@@ -40,10 +39,14 @@
 
   /* ---------- pages ---------- */
   function setFace(img, i) {
-    const { src, alt } = pages[i];
+    const { src, alt, sway: dangles } = pages[i];
     img.alt = alt;
     const sway = img.nextElementSibling;                 // the garland layer that dangles over the page
-    if (!SWAY || !sway) { img.src = src; return; }
+    if (!dangles || !sway) {
+      img.src = src;
+      if (sway) { sway.style.backgroundImage = 'none'; sway.style.webkitMaskImage = 'none'; sway.style.maskImage = 'none'; }
+      return;
+    }
     img.src = stillOf(src);                              // still page beneath, garlands removed
     sway.style.backgroundImage = `url("${src}")`;        // the garlands, cut from the full page
     const mask = `url("${maskOf(src)}")`;
@@ -62,7 +65,7 @@
       dots.hidden = true;
     }
   }
-  function preloadPages() { pages.forEach(p => { for (const s of SWAY ? [p.src, stillOf(p.src), maskOf(p.src)] : [p.src]) { const im = new Image(); im.src = s; } }); }
+  function preloadPages() { pages.forEach(p => { for (const s of p.sway ? [p.src, stillOf(p.src), maskOf(p.src)] : [p.src]) { const im = new Image(); im.src = s; } }); }
 
   /* ---------- marigold petals ---------- */
   const petalBox = document.getElementById('petals');
