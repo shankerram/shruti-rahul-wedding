@@ -4,29 +4,41 @@ A small static site: the invitation arrives wrapped in a banana leaf and tied wi
 a red-and-yellow thread, the way the printed card does. Tapping the knot unties the
 thread, the two lobes of the leaf swing open, and the invitation is revealed.
 
-- **Card 1 (front):** Ganesha, the invocation, the hosts, and both names down to
-  "Chi. Rahul (Son of Smt. Usha & Shri Rangilal Jaiswal)".
-- **Card 2 (back):** the date, venue and address, the Reception timing and the
-  compliments line. Tap the card (or use the button, arrow keys, or a swipe) to turn
-  it over.
+There are three invitations, one per guest list, all sharing the same leaf, thread
+and page-turner:
 
-Both card faces are the finished invitation artwork placed as-is (1240 x 1270), so
-the decorations, the Ganesha idol and the lettering are exactly the designer's. The
-leaf is cut from photographs of the real card.
+| Path | Pages |
+| --- | --- |
+| `/reception/` | Reception invite (hosts and names), then date, venue and Reception timing |
+| `/muhurtham-reception/` | Mehendi ceremony, then the wedding invite, then date, venue, Muhurtham and Reception |
+| `/muhurtham/` | Wedding invite, then date, venue and Muhurtham |
+
+The site root redirects to `/reception/`. Tap the card, use the buttons, arrow keys
+or a swipe to move between pages; with three pages a row of dots shows where you are.
+
+Every page is the finished artwork placed as-is, so the decorations, the Ganesha
+idol and the lettering are exactly the designer's. The leaf is cut from photographs
+of the real card.
 
 ## Files
 
 | File | What it is |
 | --- | --- |
-| `index.html` | Markup: leaf lobes, the two-sided card, the SVG thread and bow |
+| `index.html` | Redirect to `/reception/` |
+| `<route>/index.html` | One per invitation: leaf lobes, the card, the SVG thread and bow, and the list of pages |
 | `styles.css` | Layout, the 3D fold, the untie choreography, responsive sizing |
-| `main.js` | Click/keyboard/swipe handling and the open → flip → re-wrap state machine |
-| `assets/card1.jpg` | Front of the card (page 1 artwork) |
-| `assets/card2.jpg` | Back of the card (page 2 artwork) |
+| `main.js` | Click/keyboard/swipe handling and the open → turn pages → re-wrap state machine |
+| `assets/<route>/1.jpg …` | That invitation's pages, in order |
 | `assets/lobe.webp`, `assets/lobe_r.webp` | Left and right leaf lobes with transparency |
 | `assets/base.jpg` | Leaf texture that sits under the card |
 
-No build step and no dependencies. Open `index.html` in a browser or serve the folder
-from any static host. `index.html?open` loads the site already opened.
+No build step and no dependencies. Serve the folder from any static host (the pages
+use `../` paths, so open them over HTTP rather than as files). Add `?open` to a route
+to load it already opened.
+
+To add a page to an invitation, drop the image into its `assets/<route>/` folder and
+add an `<img>` line to the `.pages` list in that route's `index.html`. To add an
+invitation, copy a route folder, point its `.pages` at a new assets folder, and set
+`--ratio` on `.stage` to the artwork's height ÷ width.
 
 The page carries a `noindex` meta tag so the invitation stays out of search results.

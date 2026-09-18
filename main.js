@@ -5,26 +5,51 @@
   const tie = document.getElementById('tie');
   const hint = document.getElementById('hint');
   const controls = document.getElementById('controls');
-  const turnBtn = document.getElementById('turnBtn');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
   const closeBtn = document.getElementById('closeBtn');
+  const dots = document.getElementById('dots');
+  const frontImg = card.querySelector('.face.front img');
+  const backImg = card.querySelector('.face.back img');
+
+  // the invitation's pages, listed in the hidden .pages block of each route's index.html
+  const pages = [...document.querySelectorAll('.pages img')].map(img => ({ src: img.getAttribute('src'), alt: img.alt }));
+  const N = pages.length;
+  let cur = 0;
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const UNTIE_MS = reduced ? 50 : 1250;   // thread choreography before the leaf moves
   const FOLD_MS = reduced ? 50 : 1900;    // both lobes swung open
 
   let state = 'closed';                   // closed | untying | opening | open | closing
-  let showingBack = false;
   let flipping = false;
   let timers = [];
 
   const later = (fn, ms) => { const t = setTimeout(fn, ms); timers.push(t); return t; };
-  const clearTimers = () => { timers.forEach(clearTimeout); timers = []; };
 
   function setHint(text) {
     if (!text) { hint.classList.add('is-hidden'); return; }
     hint.classList.add('is-hidden');
     later(() => { hint.textContent = text; hint.classList.remove('is-hidden'); }, 420);
   }
+  const openHint = N > 2 ? 'Tap the card for the next page' : 'Tap the card to turn it over';
+
+  /* ---------- pages ---------- */
+  function setFace(img, i) { img.src = pages[i].src; img.alt = pages[i].alt; }
+  function renderControls() {
+    if (N > 2) {
+      nextBtn.textContent = cur === N - 1 ? 'Back to the first page' : 'Next page';
+      prevBtn.hidden = cur === 0;
+      dots.hidden = false;
+      dots.innerHTML = pages.map((_, i) => `<i class="${i === cur ? 'on' : ''}"></i>`).join('');
+      dots.setAttribute('aria-label', `Page ${cur + 1} of ${N}`);
+    } else {
+      nextBtn.textContent = cur === 0 ? 'Turn the card over' : 'Turn back to the front';
+      prevBtn.hidden = true;
+      dots.hidden = true;
+    }
+  }
+  function preloadPages() { pages.forEach(p => { const im = new Image(); im.src = p.src; }); }
 
   /* ---------- marigold petals ---------- */
   const petalBox = document.getElementById('petals');
@@ -64,6 +89,7 @@
     wrap.setAttribute('aria-label', 'Wedding invitation');
     wrap.removeAttribute('role');
     wrap.removeAttribute('tabindex');
+    preloadPages();
 
     later(() => {
       state = 'opening';
@@ -73,10 +99,11 @@
 
     later(() => {
       state = 'open';
+      renderControls();
       controls.hidden = false;
       requestAnimationFrame(() => controls.classList.add('is-visible'));
-      setHint('Tap the card to turn it over');
-      turnBtn.focus({ preventScroll: true });
+      setHint(openHint);
+      nextBtn.focus({ preventScroll: true });
     }, UNTIE_MS + FOLD_MS);
   }
 
@@ -86,7 +113,7 @@
     state = 'closing';
     controls.classList.remove('is-visible');
     setHint('');
-    if (showingBack) flip(true);         // put card 1 on top before wrapping
+    if (cur !== 0) { cur = 0; setFace(frontImg, 0); }   // first page back on top before wrapping
     stopPetals();
     scene.classList.remove('open');
     later(() => {
@@ -100,48 +127,47 @@
     }, FOLD_MS);
   }
 
-  /* ---------- flip: lift the card and turn it over ---------- */
-  function flip(instant = false) {
-    if (state !== 'open' && !instant) return;
-    if (flipping) return;
-    const from = showingBack ? 180 : 0;
-    const to = showingBack ? 0 : 180;
-    showingBack = !showingBack;
-    turnBtn.textContent = showingBack ? 'Turn back to the front' : 'Turn the card over';
-
-    if (instant || reduced) {
-      card.style.transform = `translateZ(6px) rotateY(${to}deg)`;
-      return;
-    }
+  /* ---------- turn: lift the card and turn it to page `to` ---------- */
+  function turn(to, dir) {
+    if (state !== 'open' || flipping || to === cur || to < 0 || to >= N) return;
+    setFace(backImg, to);                 // the reverse side carries the page we are turning to
+    const end = dir * 180;
+    const finish = () => {
+      cur = to;
+      setFace(frontImg, to);
+      card.style.transform = 'translateZ(6px) rotateY(0deg)';
+      flipping = false;
+      renderControls();
+    };
+    if (reduced) { finish(); return; }
     flipping = true;
     const lift = Math.round(card.getBoundingClientRect().width * 0.55);
     const anim = card.animate([
-      { transform: `translateZ(6px) rotateY(${from}deg)` },
-      { transform: `translateZ(${lift}px) rotateY(${(from + to) / 2}deg)`, offset: 0.5, easing: 'ease-in' },
-      { transform: `translateZ(6px) rotateY(${to}deg)` }
+      { transform: 'translateZ(6px) rotateY(0deg)' },
+      { transform: `translateZ(${lift}px) rotateY(${end / 2}deg)`, offset: 0.5, easing: 'ease-in' },
+      { transform: `translateZ(6px) rotateY(${end}deg)` }
     ], { duration: 1100, easing: 'ease-out', fill: 'forwards' });
-    anim.onfinish = () => {
-      card.style.transform = `translateZ(6px) rotateY(${to}deg)`;
-      anim.cancel();
-      flipping = false;
-    };
+    anim.onfinish = () => { finish(); anim.cancel(); };
   }
+  const next = () => turn(cur === N - 1 ? 0 : cur + 1, 1);
+  const prev = () => turn(cur === 0 ? N - 1 : cur - 1, -1);
 
   /* ---------- wiring ---------- */
   tie.addEventListener('click', (e) => { e.stopPropagation(); open(); });
   wrap.addEventListener('click', (e) => {
     if (state === 'closed') { open(); return; }
-    if (state === 'open' && card.contains(e.target)) flip();
+    if (state === 'open' && card.contains(e.target)) next();
   });
   wrap.addEventListener('keydown', (e) => {
     if ((e.key === 'Enter' || e.key === ' ') && state === 'closed') { e.preventDefault(); open(); }
   });
-  turnBtn.addEventListener('click', () => flip());
+  nextBtn.addEventListener('click', next);
+  prevBtn.addEventListener('click', prev);
   closeBtn.addEventListener('click', close);
   document.addEventListener('keydown', (e) => {
     if (state !== 'open') return;
-    if (e.key === 'ArrowRight' && !showingBack) flip();
-    else if (e.key === 'ArrowLeft' && showingBack) flip();
+    if (e.key === 'ArrowRight') next();
+    else if (e.key === 'ArrowLeft') prev();
     else if (e.key === 'Escape') close();
   });
 
@@ -152,16 +178,21 @@
     if (touchX === null || state !== 'open') return;
     const dx = e.changedTouches[0].clientX - touchX;
     touchX = null;
-    if (Math.abs(dx) > 40) flip();
+    if (dx < -40) next();
+    else if (dx > 40) prev();
   });
+
+  setFace(frontImg, 0);
+  setFace(backImg, Math.min(1, N - 1));
 
   // ?open in the URL skips straight to the opened card (handy for sharing a screenshot)
   if (new URLSearchParams(location.search).has('open')) {
     scene.classList.add('untied', 'open');
     state = 'open';
+    renderControls();
     controls.hidden = false;
     controls.classList.add('is-visible');
-    hint.textContent = 'Tap the card to turn it over';
+    hint.textContent = openHint;
     startPetals();
   }
 })();

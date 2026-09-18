@@ -53,7 +53,7 @@ body {
 .stage {
   position: relative;
   width: var(--w);
-  height: calc(var(--w) * 1.024);        /* the artwork is 1240 x 1270 */
+  height: calc(var(--w) * var(--ratio, 1));   /* --ratio = artwork height / width, set per route */
   perspective: calc(var(--w) * 3.2);
   perspective-origin: 50% 40%;
   opacity: 0;
@@ -264,6 +264,13 @@ body {
   box-shadow: none;
 }
 .btn:focus-visible { outline: 3px solid rgba(141, 26, 31, .45); outline-offset: 3px; }
+.btn[hidden] { display: none; }
+
+/* page dots for invitations with more than two pages */
+.dots { display: flex; gap: 8px; align-items: center; padding: 0 6px; }
+.dots[hidden] { display: none; }
+.dots i { width: 8px; height: 8px; border-radius: 50%; background: rgba(141, 26, 31, .28); transition: background .3s, transform .3s; }
+.dots i.on { background: var(--ink); transform: scale(1.25); }
 
 /* ---------- marigold petals (rain when the leaf unfolds) ---------- */
 #petals { position: fixed; inset: 0; z-index: 5; pointer-events: none; overflow: hidden; }
