@@ -38,7 +38,11 @@
   function setFace(img, i) {
     img.src = pages[i].src; img.alt = pages[i].alt;
     const sway = img.nextElementSibling;                 // the garland layer that dangles over the page
-    if (sway) sway.style.backgroundImage = `url("${pages[i].src}")`;
+    if (sway) {
+      sway.style.backgroundImage = `url("${pages[i].src}")`;
+      const mask = `url("${pages[i].src.replace(/\.jpg$/, '-mask.png')}")`;   // that page's own garland cut-out
+      sway.style.webkitMaskImage = mask; sway.style.maskImage = mask;
+    }
   }
   function renderControls() {
     if (N > 2) {
@@ -53,7 +57,7 @@
       dots.hidden = true;
     }
   }
-  function preloadPages() { pages.forEach(p => { const im = new Image(); im.src = p.src; }); }
+  function preloadPages() { pages.forEach(p => { for (const s of [p.src, p.src.replace(/\.jpg$/, '-mask.png')]) { const im = new Image(); im.src = s; } }); }
 
   /* ---------- marigold petals ---------- */
   const petalBox = document.getElementById('petals');

@@ -178,19 +178,19 @@ body {
 .face .sway {
   position: absolute; inset: 0;
   background: center / 100% 100% no-repeat;
-  -webkit-mask: url("assets/garland-mask.png") center / 100% 100% no-repeat;
-          mask: url("assets/garland-mask.png") center / 100% 100% no-repeat;
+  -webkit-mask: center / 100% 100% no-repeat;      /* image set per page by main.js */
+          mask: center / 100% 100% no-repeat;
   transform-origin: 50% 0;
-  animation: dangle 5.2s ease-in-out infinite;
+  animation: dangle 4.4s ease-in-out infinite;
   animation-play-state: paused;
   will-change: transform;
   pointer-events: none;
 }
 .open .face .sway { animation-play-state: running; }
-.face.back .sway { animation-delay: -1.3s; }
+.face.back .sway { animation-delay: -1.1s; }
 @keyframes dangle {
-  0%, 100% { transform: skewX(-.7deg); }
-  50%      { transform: skewX(.7deg); }
+  0%, 100% { transform: skewX(-1.3deg); }
+  50%      { transform: skewX(1.3deg); }
 }
 
 /* ---------- thread ---------- */
