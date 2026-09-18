@@ -35,7 +35,11 @@
   const openHint = N > 2 ? 'Tap the card for the next page' : 'Tap the card to turn it over';
 
   /* ---------- pages ---------- */
-  function setFace(img, i) { img.src = pages[i].src; img.alt = pages[i].alt; }
+  function setFace(img, i) {
+    img.src = pages[i].src; img.alt = pages[i].alt;
+    const sway = img.nextElementSibling;                 // the garland layer that dangles over the page
+    if (sway) sway.style.backgroundImage = `url("${pages[i].src}")`;
+  }
   function renderControls() {
     if (N > 2) {
       nextBtn.textContent = cur === N - 1 ? 'Back to the first page' : 'Next page';
