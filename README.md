@@ -6,12 +6,13 @@ thread, the two lobes of the leaf swing open, and the invitation is revealed.
 
 - **Card 1 (front):** Ganesha, the invocation, the hosts, and both names down to
   "Chi. Rahul (Son of Smt. Usha & Shri Rangilal Jaiswal)".
-- **Card 2 (back):** the date, venue and address, Muhurtham and Reception timings,
-  and the compliments line. Tap the card (or use the button, arrow keys, or a swipe)
-  to turn it over.
+- **Card 2 (back):** the date, venue and address, the Reception timing and the
+  compliments line. Tap the card (or use the button, arrow keys, or a swipe) to turn
+  it over.
 
-The decorations, the Ganesha idol and all the lettering are taken from the original
-invitation artwork, not redrawn. The leaf is cut from photographs of the real card.
+Both card faces are the finished invitation artwork placed as-is (1240 x 1270), so
+the decorations, the Ganesha idol and the lettering are exactly the designer's. The
+leaf is cut from photographs of the real card.
 
 ## Files
 
@@ -20,8 +21,8 @@ invitation artwork, not redrawn. The leaf is cut from photographs of the real ca
 | `index.html` | Markup: leaf lobes, the two-sided card, the SVG thread and bow |
 | `styles.css` | Layout, the 3D fold, the untie choreography, responsive sizing |
 | `main.js` | Click/keyboard/swipe handling and the open → flip → re-wrap state machine |
-| `assets/card1.jpg` | Front of the card (original artwork, lower text lifted off) |
-| `assets/card2.jpg` | Back of the card (same artwork, date/venue text re-centred) |
+| `assets/card1.jpg` | Front of the card (page 1 artwork) |
+| `assets/card2.jpg` | Back of the card (page 2 artwork) |
 | `assets/lobe.webp`, `assets/lobe_r.webp` | Left and right leaf lobes with transparency |
 | `assets/base.jpg` | Leaf texture that sits under the card |
 

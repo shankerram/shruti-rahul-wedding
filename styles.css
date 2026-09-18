@@ -53,7 +53,7 @@ body {
 .stage {
   position: relative;
   width: var(--w);
-  height: var(--w);
+  height: calc(var(--w) * 1.024);        /* the artwork is 1240 x 1270 */
   perspective: calc(var(--w) * 3.2);
   perspective-origin: 50% 40%;
   opacity: 0;
