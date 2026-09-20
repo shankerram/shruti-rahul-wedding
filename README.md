@@ -21,6 +21,10 @@ Every page is the finished artwork placed as-is, so the decorations, the Ganesha
 idol and the lettering are exactly the designer's. The leaf is cut from photographs
 of the real card.
 
+Music starts on the tap that unties the knot (browsers do not allow sound before a
+tap), loops quietly, and fades out when the card is wrapped again. The round button at
+the top right mutes it; the choice is remembered on that device.
+
 ## Files
 
 | File | What it is |
@@ -32,6 +36,7 @@ of the real card.
 | `assets/<route>/N.jpg` | That invitation's pages, in order (a route may point at another route's images) |
 | `assets/<route>/N-still.jpg`, `N-mask.png` | For a page marked `data-sway`: the page with its garlands painted out, and the garlands alone, which `main.js` layers on top and rocks gently |
 | `assets/lobe.webp`, `assets/lobe_r.webp` | Left and right leaf lobes with transparency |
+| `assets/music.m4a`, `assets/music.mp3` | Background music (flute), AAC with an MP3 fallback |
 | `assets/base.jpg` | Leaf texture that sits under the card |
 
 No build step and no dependencies. Serve the folder from any static host (the pages

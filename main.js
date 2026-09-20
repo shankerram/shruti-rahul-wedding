@@ -166,12 +166,55 @@
   }
   setCord(0);
 
+
+  /* ---------- music: starts on the tap that unties the knot, fades out when wrapped ---------- */
+  const music = document.getElementById('music'), soundBtn = document.getElementById('soundBtn');
+  let musicWanted = true;
+  try { musicWanted = localStorage.getItem('music') !== 'off'; } catch (e) {}
+  let fadeReq = null;
+  function fadeTo(vol, ms, then) {
+    if (fadeReq) cancelAnimationFrame(fadeReq);
+    const from = music.volume, t0 = performance.now();
+    const step = (now) => {
+      const t = Math.min(1, (now - t0) / ms);
+      music.volume = Math.min(1, Math.max(0, from + (vol - from) * t));
+      if (t < 1) fadeReq = requestAnimationFrame(step); else { fadeReq = null; if (then) then(); }
+    };
+    fadeReq = requestAnimationFrame(step);
+  }
+  function showSound(on) {
+    soundBtn.textContent = on ? '🔊' : '🔇';
+    soundBtn.setAttribute('aria-pressed', String(on));
+    soundBtn.setAttribute('aria-label', on ? 'Music on' : 'Music off');
+    soundBtn.classList.toggle('is-off', !on);
+  }
+  function startMusic() {
+    if (!music || !musicWanted) return;
+    try { music.volume = 0; } catch (e) {}
+    const p = music.play();
+    if (p && p.then) p.then(() => fadeTo(.7, 1800)).catch(() => showSound(false));   // blocked until a tap: show it as off
+  }
+  function stopMusic() {
+    if (!music || music.paused) return;
+    fadeTo(0, 900, () => music.pause());
+  }
+  soundBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    musicWanted = !(musicWanted && !music.paused);          // a tap while blocked or muted turns it on
+    try { localStorage.setItem('music', musicWanted ? 'on' : 'off'); } catch (e) {}
+    showSound(musicWanted);
+    if (musicWanted) startMusic(); else stopMusic();
+  });
+  showSound(musicWanted);
+
   /* ---------- open: untie, then unfold ---------- */
   function open() {
     if (state !== 'closed') return;
     state = 'untying';
     setHint('');
     scene.classList.add('untied');
+    startMusic();                                        // inside the tap, so the browser allows it
+    soundBtn.hidden = false;
     moveCord(3);                                         // loosen, pull through, fall open
     wrap.setAttribute('aria-label', 'Wedding invitation');
     wrap.removeAttribute('role');
@@ -202,6 +245,8 @@
     setHint('');
     if (cur !== 0) { cur = 0; setFace(frontImg, 0); }   // first page back on top before wrapping
     stopPetals();
+    stopMusic();
+    soundBtn.hidden = true;
     scene.classList.remove('open');
     later(() => {
       controls.hidden = true;
@@ -281,6 +326,8 @@
     scene.classList.add('untied', 'open');
     cordStage = 3; setCord(3);
     state = 'open';
+    soundBtn.hidden = false;
+    startMusic();                                        // usually blocked without a tap; the button then shows 🔇
     renderControls();
     controls.hidden = false;
     controls.classList.add('is-visible');
