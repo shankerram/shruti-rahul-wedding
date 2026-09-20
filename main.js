@@ -54,15 +54,15 @@
     sway.style.webkitMaskImage = mask; sway.style.maskImage = mask;
   }
   function renderControls() {
+    prevBtn.classList.toggle('is-ghosted', cur === 0);   // keeps its slot, so Next never moves
+    prevBtn.disabled = cur === 0;
     if (N > 2) {
-      nextBtn.textContent = cur === N - 1 ? 'Back to the first page' : 'Next page';
-      prevBtn.hidden = cur === 0;
+      nextBtn.textContent = cur === N - 1 ? 'First page' : 'Next page';
       dots.hidden = false;
       dots.innerHTML = pages.map((_, i) => `<i class="${i === cur ? 'on' : ''}"></i>`).join('');
       dots.setAttribute('aria-label', `Page ${cur + 1} of ${N}`);
     } else {
-      nextBtn.textContent = cur === 0 ? 'Turn the card over' : 'Turn back to the front';
-      prevBtn.hidden = true;
+      nextBtn.textContent = cur === 0 ? 'Turn over' : 'Turn back';
       dots.hidden = true;
     }
   }

@@ -235,15 +235,28 @@ body {
 .hint.is-hidden { opacity: 0 !important; }
 
 .controls {
-  display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;          /* Previous | Next: fixed slots, so labels changing never move anything */
+  grid-template-areas: "prev next" "dots dots" "wrap wrap" "note note";
+  gap: 10px 12px;
+  width: min(92vw, 420px);
+  justify-items: stretch;
   opacity: 0; transform: translateY(6px);
   transition: opacity .6s ease, transform .6s ease;
-  padding: 0 16px;
 }
 .controls.is-visible { opacity: 1; transform: none; }
+#prevBtn { grid-area: prev; }
+#nextBtn { grid-area: next; }
+#dots    { grid-area: dots; justify-self: center; }
+#closeBtn { grid-area: wrap; justify-self: center; min-width: 60%; }
+.note    { grid-area: note; }
+/* an invisible Previous keeps its slot so Next never shifts */
+.btn.is-ghosted { visibility: hidden; }
 .controls[hidden] { display: none; }
 .btn {
   font: inherit;
+  white-space: nowrap;
+  text-align: center;
   font-size: clamp(15px, 2vh, 19px);
   font-weight: 600;
   letter-spacing: .04em;
@@ -251,7 +264,7 @@ body {
   background: linear-gradient(180deg, #a5221f, #7f1414);
   border: 1px solid rgba(255, 220, 160, .45);
   border-radius: 999px;
-  padding: .55em 1.5em;
+  padding: .55em 1em;
   cursor: pointer;
   box-shadow: 0 6px 16px -8px rgba(90, 10, 10, .7), inset 0 1px 0 rgba(255, 255, 255, .25);
   transition: transform .15s ease, box-shadow .15s ease;
@@ -265,7 +278,6 @@ body {
   box-shadow: none;
 }
 .btn:focus-visible { outline: 3px solid rgba(141, 26, 31, .45); outline-offset: 3px; }
-.btn[hidden] { display: none; }
 
 /* the zoom reminder: large and plain, for guests who are not used to phones */
 .note {
@@ -275,12 +287,12 @@ body {
   font-weight: 600;
   letter-spacing: .01em;
   color: var(--ink);
-  margin-top: .35em;
+  margin-top: .2em;
 }
 .note span { font-size: .9em; margin-right: .15em; }
 
 /* page dots for invitations with more than two pages */
-.dots { display: flex; gap: 8px; align-items: center; padding: 0 6px; }
+.dots { display: flex; gap: 8px; align-items: center; padding: 0 6px; min-height: 8px; }
 .dots[hidden] { display: none; }
 .dots i { width: 8px; height: 8px; border-radius: 50%; background: rgba(141, 26, 31, .28); transition: background .3s, transform .3s; }
 .dots i.on { background: var(--ink); transform: scale(1.25); }
