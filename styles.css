@@ -297,18 +297,36 @@ body {
 .dots i { width: 8px; height: 8px; border-radius: 50%; background: rgba(141, 26, 31, .28); transition: background .3s, transform .3s; }
 .dots i.on { background: var(--ink); transform: scale(1.25); }
 
-/* ---------- marigold petals (rain when the leaf unfolds) ---------- */
-#petals { position: fixed; inset: 0; z-index: 5; pointer-events: none; overflow: hidden; }
+/* ---------- petals (rain when the leaf unfolds) ---------- */
+#petals { position: fixed; inset: 0; z-index: 5; pointer-events: none; overflow: hidden; perspective: 600px; }
+/* outer: falls and sways; inner: the petal itself, tumbling in 3D */
 .petal {
   position: absolute; top: -8vh;
-  border-radius: 52% 52% 46% 46% / 62% 62% 38% 38%;
   will-change: transform, opacity;
-  animation: fall linear forwards;
+  animation: fall var(--dur, 8s) linear var(--delay, 0s) forwards;
+  filter: blur(var(--blur, 0px));
+  opacity: 0;
+}
+.petal > i {
+  display: block;
+  width: 100%; height: 100%;
+  background: var(--img) center / 100% 100% no-repeat;
+  transform-style: preserve-3d;
+  animation: tumble var(--spin, 2s) ease-in-out var(--delay, 0s) infinite alternate;
+  filter: drop-shadow(0 1px 1px rgba(60, 20, 0, .25));
 }
 @keyframes fall {
-  0%   { opacity: 0;   transform: translate3d(0, -10vh, 0) rotate(0deg); }
-  8%   { opacity: .95; }
-  100% { opacity: 0;   transform: translate3d(var(--dx, 40px), 112vh, 0) rotate(var(--rot, 540deg)); }
+  0%   { opacity: 0; transform: translate3d(0, -10vh, 0) rotate(0deg); }
+  6%   { opacity: var(--o, .95); }
+  25%  { transform: translate3d(calc(var(--dx) * .25 + var(--sway)), 22vh, 0) rotate(calc(var(--rot) * .25)); }
+  50%  { transform: translate3d(calc(var(--dx) * .5 - var(--sway)), 50vh, 0) rotate(calc(var(--rot) * .5)); }
+  75%  { transform: translate3d(calc(var(--dx) * .75 + var(--sway) * .7), 80vh, 0) rotate(calc(var(--rot) * .75)); }
+  92%  { opacity: var(--o, .95); }
+  100% { opacity: 0; transform: translate3d(var(--dx), 112vh, 0) rotate(var(--rot)); }
+}
+@keyframes tumble {
+  0%   { transform: rotateX(var(--tx0)) rotateY(var(--ty0)) rotateZ(0deg); }
+  100% { transform: rotateX(var(--tx1)) rotateY(var(--ty1)) rotateZ(var(--tz1)); }
 }
 
 /* ---------- music toggle ---------- */

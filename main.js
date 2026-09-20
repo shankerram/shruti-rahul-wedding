@@ -68,25 +68,53 @@
   }
   function preloadPages() { pages.forEach(p => { for (const s of p.sway ? [p.src, stillOf(p.src), maskOf(p.src)] : [p.src]) { const im = new Image(); im.src = s; } }); }
 
-  /* ---------- marigold petals ---------- */
+  /* ---------- petals: SVG petal shapes that tumble and sway as they fall ---------- */
   const petalBox = document.getElementById('petals');
+  // each set: [base colour, tip colour, vein colour] variants, and the petal outline
   const PETAL_SETS = {
-    marigold: { colors: ['#f0821e', '#ffb32a', '#e8761b', '#ffc93c', '#d8571a', '#ff9c22'], shadow: 'rgba(90,40,0,.45)', inset: 'rgba(140,60,0,.3)' },
-    pink:     { colors: ['#f4a3b8', '#e9789a', '#f7c1cf', '#d95c86', '#f18fb0', '#c94a75'], shadow: 'rgba(120,30,60,.35)', inset: 'rgba(150,40,80,.28)' }
+    marigold: {
+      shades: [['#d9641a', '#ffc23a', '#b84e10'], ['#e8761b', '#ffd45c', '#c25a12'], ['#f0892a', '#ffe08a', '#d06a16'], ['#c9541c', '#ffb03a', '#a4420e']],
+      // narrow base, ruffled fan tip
+      path: 'M20 38 C15 31 8 23 8 14 C8 9 10 5 13 4 C15 8 17 5 18 2 C20 6 22 4 24 2 C26 6 28 8 31 4 C34 5 35 9 35 14 C35 23 26 31 20 38 Z',
+      veins: 'M20 36 L20 10 M20 30 L14 12 M20 30 L26 12', o: .95
+    },
+    pink: {
+      shades: [['#e8779a', '#fbd0dc', '#c9557c'], ['#d95c86', '#f7bfd0', '#b84a70'], ['#f29ab5', '#fde3ea', '#d97a99'], ['#c94a75', '#f4a9c0', '#a63a60']],
+      // rounded rose petal with a soft notch at the top
+      path: 'M20 38 C9 35 3 25 5 15 C7 7 13 2 17 5 C18 3 22 3 23 5 C27 2 33 7 35 15 C37 25 31 35 20 38 Z',
+      veins: 'M20 36 C19 26 17 18 14 12 M20 36 C21 26 23 18 26 12', o: .92
+    }
+  };
+  const petalSvg = (set, k, seed) => {
+    const [base, tip, vein] = set.shades[k % set.shades.length];
+    const id = 'g' + k + seed;
+    return 'url("data:image/svg+xml;utf8,' + encodeURIComponent(
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">` +
+      `<defs><linearGradient id="${id}" x1="0" y1="1" x2="${(0.3 + seed * 0.4).toFixed(2)}" y2="0">` +
+      `<stop offset="0" stop-color="${base}"/><stop offset=".45" stop-color="${base}"/><stop offset="1" stop-color="${tip}"/></linearGradient></defs>` +
+      `<path d="${set.path}" fill="url(#${id})"/>` +
+      `<path d="${set.veins}" fill="none" stroke="${vein}" stroke-width=".7" stroke-opacity=".45" stroke-linecap="round"/>` +
+      `<path d="${set.path}" fill="none" stroke="${vein}" stroke-width=".6" stroke-opacity=".35"/>` +
+      `<ellipse cx="14" cy="12" rx="5" ry="9" fill="white" opacity=".16" transform="rotate(-20 14 12)"/>` +
+      `</svg>`) + '")';
   };
   let petalTimer = null;
+  const rnd = (a, b) => a + Math.random() * (b - a);
   function dropPetal(i, maxDelay) {
     const set = PETAL_SETS[pages[cur].petals] || PETAL_SETS.marigold;   // the page on show decides the colour
     const p = document.createElement('i');
     p.className = 'petal';
-    const unit = Math.max(10, Math.min(innerWidth, innerHeight) * 0.016);   // grows with the screen
-    const w = unit * (0.8 + Math.random() * 1.2), h = w * (.62 + Math.random() * .32);
-    const dur = 6 + Math.random() * 6, delay = Math.random() * maxDelay;
-    p.style.cssText = `left:${Math.random() * 100}%;width:${w.toFixed(1)}px;height:${h.toFixed(1)}px;
-      background:linear-gradient(145deg,${set.colors[i % set.colors.length]} 20%,${set.colors[(i + 3) % set.colors.length]});
-      box-shadow:0 1px 4px ${set.shadow}, inset 0 -2px 3px ${set.inset};
-      --dx:${(Math.random() * 260 - 130).toFixed(0)}px;--rot:${(Math.random() * 900 - 380).toFixed(0)}deg;
-      animation-duration:${dur.toFixed(2)}s;animation-delay:${delay.toFixed(2)}s`;
+    p.appendChild(document.createElement('i'));
+    const depth = Math.random();                                            // 0 = far, 1 = near
+    const unit = Math.max(14, Math.min(innerWidth, innerHeight) * 0.026);
+    const size = unit * (0.7 + depth * 1.1);
+    const dur = rnd(7, 12) - depth * 2, delay = Math.random() * maxDelay;
+    p.style.cssText = `left:${rnd(-3, 103).toFixed(1)}%;width:${size.toFixed(1)}px;height:${size.toFixed(1)}px;
+      --img:${petalSvg(set, i, Math.random().toFixed(2))};
+      --dx:${rnd(-180, 180).toFixed(0)}px;--sway:${rnd(18, 55).toFixed(0)}px;--rot:${rnd(-540, 540).toFixed(0)}deg;
+      --tx0:${rnd(-70, 70).toFixed(0)}deg;--ty0:${rnd(-60, 60).toFixed(0)}deg;--tx1:${rnd(-70, 70).toFixed(0)}deg;--ty1:${rnd(-60, 60).toFixed(0)}deg;--tz1:${rnd(-40, 40).toFixed(0)}deg;
+      --spin:${rnd(1.4, 2.8).toFixed(2)}s;--blur:${((1 - depth) * 0.8).toFixed(2)}px;--o:${(set.o * (0.8 + depth * 0.2)).toFixed(2)};
+      --dur:${dur.toFixed(2)}s;--delay:${delay.toFixed(2)}s`;
     petalBox.appendChild(p);
     setTimeout(() => p.remove(), (dur + delay) * 1000 + 200);
   }
