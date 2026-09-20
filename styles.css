@@ -97,7 +97,7 @@ body {
 }
 .base {
   position: absolute; inset: 0;
-  background: url("assets/base.jpg") center / cover no-repeat;
+  background: url("assets/base.jpg?v=2") center / cover no-repeat;
   transform: translateZ(0);
 }
 .flap {
@@ -134,8 +134,10 @@ body {
   transform: translateZ(14px) rotateY(-180deg);
   transition-delay: 0s;
 }
-.open .flap-l { transform: translateZ(20px) rotateY(0deg);  transition-delay: 0s; }
-.open .flap-r { transform: translateZ(14px) rotateY(0deg);  transition-delay: .6s; }
+/* open: the lobes settle just above the base and BEHIND the card (card sits at 6px), so their
+   overhang laps the base without covering the card's edges */
+.open .flap-l { transform: translateZ(2px) rotateY(0deg);  transition-delay: 0s; }
+.open .flap-r { transform: translateZ(3px) rotateY(0deg);  transition-delay: .6s; }
 
 /* slight shading so the folded lobes read as the underside catching less light */
 .flap::after {
