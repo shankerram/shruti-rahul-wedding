@@ -6,7 +6,9 @@
   --w: min(88vw, 58vh);
   --leaf-top: 4%;
   --leaf-h: 92%;
-  --flap-w: 86%;
+  --fw: 86;                         /* lobe width, % of the card */
+  --lap: 3.5;                       /* how far a lobe overhangs its hinge, % of the card */
+  --flap-w: calc(var(--fw) * 1%);
 
   --paper: #efe7d8;
   --paper-2: #e6dcc8;
@@ -17,7 +19,7 @@
   --ease-fold: cubic-bezier(.45, .05, .2, 1);
 }
 @media (min-aspect-ratio: 5/4) {
-  :root { --w: min(38vw, 66vh); --flap-w: 80%; }
+  :root { --w: min(38vw, 66vh); --fw: 80; }
 }
 @media (min-aspect-ratio: 5/4) and (max-height: 520px) {
   :root { --w: min(38vw, 72vh); }
@@ -96,14 +98,12 @@ body {
 .base {
   position: absolute; inset: 0;
   background: url("assets/base.jpg") center / cover no-repeat;
-  border-radius: 2px 6px 3px 6px;
-  box-shadow: 0 1px 0 rgba(0, 0, 0, .15);
   transform: translateZ(0);
 }
 .flap {
   position: absolute;
   top: 0; height: 100%;
-  width: var(--flap-w);
+  width: calc((var(--fw) + var(--lap)) * 1%);         /* the lobe plus its overhang past the hinge */
   transform-style: preserve-3d;
   backface-visibility: visible;
   will-change: transform;
@@ -115,19 +115,22 @@ body {
   display: block;
   object-fit: fill;
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .28));
+  transition: filter var(--t-flap) ease;
   pointer-events: none;
 }
+/* open: the lobes lie flat on the base as one leaf, so no shadow along the hinge */
+.open .flap img { filter: drop-shadow(0 0 0 rgba(0, 0, 0, 0)); }
 /* left lobe: lies outside on the left when open, hinged on the card's left edge */
 .flap-l {
   left: calc(-1 * var(--flap-w));
-  transform-origin: 100% 50%;
+  transform-origin: calc(100% * var(--fw) / (var(--fw) + var(--lap))) 50%;   /* hinge exactly on the card's left edge */
   transform: translateZ(20px) rotateY(180deg);
   transition-delay: .55s;               /* closing: it lands last, on top */
 }
 /* right lobe: lies outside on the right when open, hinged on the card's right edge */
 .flap-r {
-  left: 100%;
-  transform-origin: 0 50%;
+  left: calc(100% - var(--lap) * 1%);
+  transform-origin: calc(100% * var(--lap) / (var(--fw) + var(--lap))) 50%;  /* hinge exactly on the card's right edge */
   transform: translateZ(14px) rotateY(-180deg);
   transition-delay: 0s;
 }
