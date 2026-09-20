@@ -1,5 +1,8 @@
 # Shruti & Rahul — banana-leaf wedding invitation
 
+Live at **https://shrutiwedsrahul.in** (GitHub Pages, custom domain via the `CNAME` file;
+DNS at GoDaddy: four `A` records to GitHub's Pages IPs and `www` as a CNAME).
+
 A small static site: the invitation arrives wrapped in a banana leaf and tied with
 a red-and-yellow thread, the way the printed card does. Tapping the knot unties the
 thread, the two lobes of the leaf swing open, and the invitation is revealed.
