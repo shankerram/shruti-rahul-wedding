@@ -39,7 +39,7 @@ the top right mutes it; the choice is remembered on that device.
 | `assets/<route>/N.jpg` | That invitation's pages, in order (a route may point at another route's images) |
 | `assets/<route>/N-still.jpg`, `N-mask.png` | For a page marked `data-sway`: the page with its garlands painted out, and the garlands alone, which `main.js` layers on top and rocks gently |
 | `assets/lobe.webp`, `assets/lobe_r.webp` | Left and right leaf lobes with transparency |
-| `assets/music.m4a`, `assets/music.mp3` | Background music (flute), AAC with an MP3 fallback |
+| `assets/music.m4a`, `assets/music.mp3` | Background music (Seetha Kalyana, guitar/piano/violin), AAC with an MP3 fallback |
 | `assets/base.jpg` | Leaf texture that sits under the card |
 
 No build step and no dependencies. Serve the folder from any static host (the pages
