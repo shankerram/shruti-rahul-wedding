@@ -4,13 +4,14 @@ A small static site: the invitation arrives wrapped in a banana leaf and tied wi
 a red-and-yellow thread, the way the printed card does. Tapping the knot unties the
 thread, the two lobes of the leaf swing open, and the invitation is revealed.
 
-There are three invitations, one per guest list, all sharing the same leaf, thread
+There are four invitations, one per guest list, all sharing the same leaf, thread
 and page-turner:
 
 | Path | Pages |
 | --- | --- |
 | `/reception/` | Reception invite (hosts and names), then date, venue and Reception timing |
 | `/muhurtham-reception/` | Mehendi ceremony, then the wedding invite, then date, venue, Muhurtham and Reception |
+| `/muhurtham-reception-only/` | Wedding invite, then date, venue, Muhurtham and Reception (no Mehendi page) |
 | `/muhurtham/` | Wedding invite, then date, venue and Muhurtham |
 
 The site root redirects to `/reception/`. Tap the card, use the buttons, arrow keys
@@ -28,7 +29,8 @@ of the real card.
 | `<route>/index.html` | One per invitation: leaf lobes, the card, the SVG thread and bow, and the list of pages |
 | `styles.css` | Layout, the 3D fold, the untie choreography, responsive sizing |
 | `main.js` | Click/keyboard/swipe handling and the open → turn pages → re-wrap state machine |
-| `assets/<route>/1.jpg …` | That invitation's pages, in order |
+| `assets/<route>/N.jpg` | That invitation's pages, in order (a route may point at another route's images) |
+| `assets/<route>/N-still.jpg`, `N-mask.png` | For a page marked `data-sway`: the page with its garlands painted out, and the garlands alone, which `main.js` layers on top and rocks gently |
 | `assets/lobe.webp`, `assets/lobe_r.webp` | Left and right leaf lobes with transparency |
 | `assets/base.jpg` | Leaf texture that sits under the card |
 

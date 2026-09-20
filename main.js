@@ -21,7 +21,7 @@
   let cur = 0;
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const UNTIE_MS = reduced ? 50 : 1250;   // thread choreography before the leaf moves
+  const UNTIE_MS = reduced ? 50 : 1650;   // cord untie choreography before the leaf moves
   const FOLD_MS = reduced ? 50 : 1900;    // both lobes swung open
 
   let state = 'closed';                   // closed | untying | opening | open | closing
@@ -88,13 +88,83 @@
   // a burst as the leaf unfolds, then a gentle steady drift for as long as the card is open
   function startPetals() {
     if (reduced || petalTimer) return;
-    for (let i = 0; i < 40; i++) dropPetal(i, 2.4);
-    let n = 40;
-    petalTimer = setInterval(() => { if (!document.hidden) dropPetal(n++, 0); }, 380);
+    for (let i = 0; i < 26; i++) dropPetal(i, 2.4);
+    let n = 26;
+    petalTimer = setInterval(() => { if (!document.hidden) dropPetal(n++, 0); }, 600);
   }
   function stopPetals() {
     if (petalTimer) { clearInterval(petalTimer); petalTimer = null; }
   }
+
+
+  /* ---------- the cord: one thread, morphed between shapes ----------
+     Shapes are point lists (start + 3 per cubic segment) in the tie SVG's coordinates
+     (card = 0..1000). Piece L runs from the left band edge, through the knot, both loops
+     and down the tail; piece R from the right band edge into the knot. Stage 0 = tied bow,
+     1 = knot loosened, 2 = loops pulled through so the cord hangs slack, 3 = lying open on
+     the table below the leaf, where the two pieces meet end to end as a single thread. */
+  const cordL = document.getElementById('cordL'), cordR = document.getElementById('cordR');
+  const frayL = document.getElementById('frayL'), frayR = document.getElementById('frayR');
+  const K = 470, KY = 470;                                   // knot centre
+  const L0 = [[-20,472],[150,466],[330,476],[452,470],
+    [470,440],[505,455],[500,485],  [480,505],[455,490],[462,470],                       // knot
+    [540,440],[600,370],[650,320],  [700,270],[760,280],[750,340],  [740,400],[640,430],[560,460],  [520,475],[490,480],[470,470],   // loop A
+    [420,500],[350,560],[310,620],  [270,680],[290,730],[340,700],  [390,670],[420,590],[450,520],  [460,495],[470,480],[472,472],   // loop B
+    [495,530],[515,600],[520,700],  [522,760],[540,820],[530,880],  [528,900],[526,920],[524,935]];                                 // tail
+  const R0 = [[1040,468],[900,462],[700,474],[520,470],[505,460],[495,462],[490,470],[488,474],[486,476],[485,478]];
+  const scaleAbout = (p, s, dy = 0) => [K + (p[0] - K) * s, KY + (p[1] - KY) * s + dy];
+  // stage 1: knot opened, loops slack, tail dropped a little
+  const L1 = L0.map((p, i) => i >= 4 && i <= 33 ? scaleAbout(p, 1.22) : i > 33 ? [p[0] + 6, p[1] + 30] : p);
+  const R1 = R0.map((p, i) => i >= 4 ? [p[0] - 10, p[1] + 26] : p);
+  // stage 2: loops gone; the freed length hangs as one slack line from the sagging band
+  const lerpPts = (a, b, n) => Array.from({ length: n }, (_, i) => { const t = n === 1 ? 0 : i / (n - 1); return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]; });
+  const wob = (pts, amp) => pts.map((p, i) => [p[0] + Math.sin(i * 1.7) * amp, p[1] + Math.cos(i * 1.3) * amp * .6]);
+  const L2 = [[-20,478],[150,490],[330,512],[452,522], ...wob(lerpPts([462,545],[508,760],30), 3.5), ...lerpPts([520,800],[560,960],9)];
+  const R2 = [[1040,478],[900,490],[700,512],[520,526], ...lerpPts([508,540],[498,600],6)];
+  // stage 3: lying on the table just below the leaf, one continuous wavy line
+  const tableY = (x) => 1030 + 13 * Math.sin((x + 280) / 62);
+  const L3 = Array.from({ length: 43 }, (_, i) => { const x = -280 + 800 * i / 42; return [x, tableY(x)]; });
+  const R3 = Array.from({ length: 10 }, (_, i) => { const x = 1260 - 740 * i / 9; return [x, tableY(x)]; });
+  const STAGES = [[L0, R0], [L1, R1], [L2, R2], [L3, R3]];
+  const DUR = [320, 560, 720];                                // ms per stage transition
+  const toD = (pts) => { let d = `M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`; for (let i = 1; i < pts.length; i += 3) d += ` C${pts[i][0].toFixed(1)} ${pts[i][1].toFixed(1)} ${pts[i+1][0].toFixed(1)} ${pts[i+1][1].toFixed(1)} ${pts[i+2][0].toFixed(1)} ${pts[i+2][1].toFixed(1)}`; return d; };
+  const mix = (a, b, t) => a.map((p, i) => [p[0] + (b[i][0] - p[0]) * t, p[1] + (b[i][1] - p[1]) * t]);
+  function drawCord(L, R) {
+    const dL = toD(L), dR = toD(R);
+    cordL.querySelectorAll(':scope > path').forEach(p => p.setAttribute('d', dL));
+    cordR.querySelectorAll(':scope > path').forEach(p => p.setAttribute('d', dR));
+    const e = L[L.length - 1], s = R[0];
+    frayL.setAttribute('transform', `translate(${e[0].toFixed(1)} ${e[1].toFixed(1)})`);
+    frayL.style.opacity = Math.max(0, Math.min(1, 1 - (cordPos - 2.1) * 3));   // the tail end meets the other piece once open
+    frayR.setAttribute('transform', `translate(${s[0].toFixed(1)} ${s[1].toFixed(1)})`);
+  }
+  let cordStage = 0, cordPos = 0;                            // 0 tied … 3 open
+  const easeInOut = (t) => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  function setCord(pos) {                                    // pos 0..3, fractional between stages
+    cordPos = pos;
+    const i = Math.min(2, Math.floor(pos)), t = pos - i;
+    const [La, Ra] = STAGES[i], [Lb, Rb] = STAGES[i + 1];
+    drawCord(mix(La, Lb, t), mix(Ra, Rb, t));
+  }
+  function moveCord(toStage) {                               // animate stage by stage, forward or back
+    return new Promise((resolve) => {
+      if (reduced) { cordStage = toStage; setCord(toStage); resolve(); return; }
+      const dir = toStage > cordStage ? 1 : -1;
+      const step = () => {
+        if (cordStage === toStage) { resolve(); return; }
+        const from = cordStage, to = cordStage + dir, dur = DUR[Math.min(from, to)];
+        const t0 = performance.now();
+        const frame = (now) => {
+          const t = Math.min(1, (now - t0) / dur);
+          setCord(from + (to - from) * easeInOut(t));
+          if (t < 1) requestAnimationFrame(frame); else { cordStage = to; step(); }
+        };
+        requestAnimationFrame(frame);
+      };
+      step();
+    });
+  }
+  setCord(0);
 
   /* ---------- open: untie, then unfold ---------- */
   function open() {
@@ -102,6 +172,7 @@
     state = 'untying';
     setHint('');
     scene.classList.add('untied');
+    moveCord(3);                                         // loosen, pull through, fall open
     wrap.setAttribute('aria-label', 'Wedding invitation');
     wrap.removeAttribute('role');
     wrap.removeAttribute('tabindex');
@@ -134,12 +205,14 @@
     scene.classList.remove('open');
     later(() => {
       controls.hidden = true;
-      scene.classList.remove('untied');
-      wrap.setAttribute('role', 'button');
-      wrap.setAttribute('tabindex', '0');
-      wrap.setAttribute('aria-label', 'Open the invitation');
-      state = 'closed';
-      setHint('Tap the knot to open');
+      moveCord(0).then(() => {                           // the cord gathers, loops form and pull tight
+        scene.classList.remove('untied');
+        wrap.setAttribute('role', 'button');
+        wrap.setAttribute('tabindex', '0');
+        wrap.setAttribute('aria-label', 'Open the invitation');
+        state = 'closed';
+        setHint('Tap the knot to open');
+      });
     }, FOLD_MS);
   }
 
@@ -188,9 +261,11 @@
   });
 
   // swipe on the open card
-  let touchX = null;
-  card.addEventListener('touchstart', (e) => { touchX = e.touches[0].clientX; }, { passive: true });
+  let touchX = null, pinched = false;
+  card.addEventListener('touchstart', (e) => { if (e.touches.length > 1) { pinched = true; touchX = null; return; } pinched = false; touchX = e.touches[0].clientX; }, { passive: true });
+  card.addEventListener('touchmove', (e) => { if (e.touches.length > 1) pinched = true; }, { passive: true });
   card.addEventListener('touchend', (e) => {
+    if (pinched || e.touches.length > 0) return;         // a zoom gesture, not a swipe
     if (touchX === null || state !== 'open') return;
     const dx = e.changedTouches[0].clientX - touchX;
     touchX = null;
@@ -204,6 +279,7 @@
   // ?open in the URL skips straight to the opened card (handy for sharing a screenshot)
   if (new URLSearchParams(location.search).has('open')) {
     scene.classList.add('untied', 'open');
+    cordStage = 3; setCord(3);
     state = 'open';
     renderControls();
     controls.hidden = false;

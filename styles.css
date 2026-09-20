@@ -211,29 +211,9 @@ body {
 .rope .red   { stroke: #c22a1c; stroke-width: 9.5; }
 .rope .twist { stroke: #f3c23a; stroke-width: 3.6; stroke-dasharray: 6 11; opacity: .95; }
 .rope .twist2 { stroke: #8e1c12; stroke-width: 3.2; stroke-dasharray: 5 12; stroke-dashoffset: 8; opacity: .8; }
-.rope.knot .rim { stroke-width: 15; }
-.rope.knot .red { stroke-width: 11; }
-.rope.knot .twist { stroke-dasharray: 4 9; }
 .fray path { stroke: #c22a1c; stroke-width: 2.6; opacity: .9; }
 .fray path:nth-child(1) { stroke: #f3c23a; }
 
-/* the loose ends lie on the table beside the leaf: hidden while tied */
-.loose { opacity: 0; transition: opacity .5s ease; }
-
-/* untie choreography (all timings relative to the click) */
-.bow { transform-box: fill-box; }
-.loop { transform-origin: 470px 470px; transition: transform .55s cubic-bezier(.6, 0, .9, .4), opacity .3s ease .35s; }
-.loop-b { transition-delay: .08s, .4s; }
-.tail  { transform-origin: 470px 470px; transition: transform .6s cubic-bezier(.3, .6, .4, 1) .25s, opacity .35s ease .55s; }
-.knot  { transform-origin: 470px 470px; transition: transform .45s ease .35s, opacity .3s ease .55s; }
-.band  { transition: transform .7s cubic-bezier(.4, .2, .6, 1) .6s, opacity .5s ease .85s; }
-
-.untied .loop   { transform: scale(.04) rotate(-25deg); opacity: 0; }
-.untied .loop-b { transform: scale(.04) rotate(30deg); }
-.untied .tail   { transform: translate(60px, 150px) rotate(-18deg); opacity: 0; }
-.untied .knot   { transform: scale(.2); opacity: 0; }
-.untied .band   { transform: translateY(85px) rotate(1.6deg); opacity: 0; }
-.untied .loose  { opacity: 1; transition-delay: .75s; }
 .open .tie { transform: translateZ(1px); transition: transform 0s linear .1s; }
 
 /* ---------- hint + controls ---------- */
@@ -285,6 +265,18 @@ body {
 .btn:focus-visible { outline: 3px solid rgba(141, 26, 31, .45); outline-offset: 3px; }
 .btn[hidden] { display: none; }
 
+/* the zoom reminder: large and plain, for guests who are not used to phones */
+.note {
+  flex-basis: 100%;
+  text-align: center;
+  font-size: clamp(19px, 2.6vh, 26px);
+  font-weight: 600;
+  letter-spacing: .01em;
+  color: var(--ink);
+  margin-top: .35em;
+}
+.note span { font-size: .9em; margin-right: .15em; }
+
 /* page dots for invitations with more than two pages */
 .dots { display: flex; gap: 8px; align-items: center; padding: 0 6px; }
 .dots[hidden] { display: none; }
@@ -308,7 +300,7 @@ body {
 /* ---------- motion preferences ---------- */
 @media (prefers-reduced-motion: reduce) {
   .stage { animation-duration: .01s; animation-delay: 0s; }
-  .flap, .shadow, .wrap, .loop, .tail, .knot, .band, .loose { transition-duration: .01s !important; transition-delay: 0s !important; }
+  .flap, .shadow, .wrap { transition-duration: .01s !important; transition-delay: 0s !important; }
   .hint { animation-delay: 0s; animation-duration: .01s; }
   .petal { display: none; }
   .face .sway { animation: none; }
