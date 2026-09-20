@@ -201,7 +201,10 @@ body {
   overflow: visible;
   transform: translateZ(32px);
   pointer-events: none;
+  transition: opacity .45s ease, transform 0s linear 0s;
 }
+/* untied: the cord has slipped behind the leaf. It fades as it slides, then drops behind the base */
+.cord-hidden .tie { opacity: 0; transform: translateZ(-2px); transition: opacity .45s ease, transform 0s linear .45s; }
 .tie .hit { fill: transparent; pointer-events: all; cursor: pointer; }
 .open .tie .hit, .untied .tie .hit { pointer-events: none; }
 
@@ -214,7 +217,6 @@ body {
 .fray path { stroke: #c22a1c; stroke-width: 2.6; opacity: .9; }
 .fray path:nth-child(1) { stroke: #f3c23a; }
 
-.open .tie { transform: translateZ(1px); transition: transform 0s linear .1s; }
 
 /* ---------- hint + controls ---------- */
 .hint {

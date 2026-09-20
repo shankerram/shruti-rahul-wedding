@@ -43,6 +43,9 @@ No build step and no dependencies. Serve the folder from any static host (the pa
 use `../` paths, so open them over HTTP rather than as files). Add `?open` to a route
 to load it already opened.
 
+A page's `<img>` can carry `data-sway` (garlands dangle) and `data-petals="pink"` (rose
+petals fall while that page is showing, instead of marigold).
+
 To add a page to an invitation, drop the image into its `assets/<route>/` folder and
 add an `<img>` line to the `.pages` list in that route's `index.html`. To add an
 invitation, copy a route folder, point its `.pages` at a new assets folder, and set

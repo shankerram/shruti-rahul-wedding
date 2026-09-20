@@ -14,7 +14,8 @@
 
   // the invitation's pages, listed in the hidden .pages block of each route's index.html
   // a page marked data-sway has its garlands dangling over a copy with them painted out
-  const pages = [...document.querySelectorAll('.pages img')].map(img => ({ src: img.getAttribute('src'), alt: img.alt, sway: img.hasAttribute('data-sway') }));
+  // data-petals="pink" on a page's img gives that page rose petals instead of marigold
+  const pages = [...document.querySelectorAll('.pages img')].map(img => ({ src: img.getAttribute('src'), alt: img.alt, sway: img.hasAttribute('data-sway'), petals: img.dataset.petals || 'marigold' }));
   const stillOf = (src) => src.replace(/\.jpg$/, '-still.jpg');   // the page with its garlands painted out
   const maskOf = (src) => src.replace(/\.jpg$/, '-mask.png');     // the garlands alone
   const N = pages.length;
@@ -69,17 +70,21 @@
 
   /* ---------- marigold petals ---------- */
   const petalBox = document.getElementById('petals');
-  const PETAL_COLORS = ['#f0821e', '#ffb32a', '#e8761b', '#ffc93c', '#d8571a', '#ff9c22'];
+  const PETAL_SETS = {
+    marigold: { colors: ['#f0821e', '#ffb32a', '#e8761b', '#ffc93c', '#d8571a', '#ff9c22'], shadow: 'rgba(90,40,0,.45)', inset: 'rgba(140,60,0,.3)' },
+    pink:     { colors: ['#f4a3b8', '#e9789a', '#f7c1cf', '#d95c86', '#f18fb0', '#c94a75'], shadow: 'rgba(120,30,60,.35)', inset: 'rgba(150,40,80,.28)' }
+  };
   let petalTimer = null;
   function dropPetal(i, maxDelay) {
+    const set = PETAL_SETS[pages[cur].petals] || PETAL_SETS.marigold;   // the page on show decides the colour
     const p = document.createElement('i');
     p.className = 'petal';
     const unit = Math.max(10, Math.min(innerWidth, innerHeight) * 0.016);   // grows with the screen
     const w = unit * (0.8 + Math.random() * 1.2), h = w * (.62 + Math.random() * .32);
     const dur = 6 + Math.random() * 6, delay = Math.random() * maxDelay;
     p.style.cssText = `left:${Math.random() * 100}%;width:${w.toFixed(1)}px;height:${h.toFixed(1)}px;
-      background:linear-gradient(145deg,${PETAL_COLORS[i % PETAL_COLORS.length]} 20%,${PETAL_COLORS[(i + 3) % PETAL_COLORS.length]});
-      box-shadow:0 1px 4px rgba(90,40,0,.45), inset 0 -2px 3px rgba(140,60,0,.3);
+      background:linear-gradient(145deg,${set.colors[i % set.colors.length]} 20%,${set.colors[(i + 3) % set.colors.length]});
+      box-shadow:0 1px 4px ${set.shadow}, inset 0 -2px 3px ${set.inset};
       --dx:${(Math.random() * 260 - 130).toFixed(0)}px;--rot:${(Math.random() * 900 - 380).toFixed(0)}deg;
       animation-duration:${dur.toFixed(2)}s;animation-delay:${delay.toFixed(2)}s`;
     petalBox.appendChild(p);
@@ -121,10 +126,11 @@
   const wob = (pts, amp) => pts.map((p, i) => [p[0] + Math.sin(i * 1.7) * amp, p[1] + Math.cos(i * 1.3) * amp * .6]);
   const L2 = [[-20,478],[150,490],[330,512],[452,522], ...wob(lerpPts([462,545],[508,760],30), 3.5), ...lerpPts([520,800],[560,960],9)];
   const R2 = [[1040,478],[900,490],[700,512],[520,526], ...lerpPts([508,540],[498,600],6)];
-  // stage 3: lying on the table just below the leaf, one continuous wavy line
-  const tableY = (x) => 1030 + 13 * Math.sin((x + 280) / 62);
-  const L3 = Array.from({ length: 43 }, (_, i) => { const x = -280 + 800 * i / 42; return [x, tableY(x)]; });
-  const R3 = Array.from({ length: 10 }, (_, i) => { const x = 1260 - 740 * i / 9; return [x, tableY(x)]; });
+  // stage 3: slid down inside the card's outline, where it slips behind the leaf (the SVG drops
+  // behind the leaf base and fades as it gets there, see .cord-hidden)
+  const hideY = (x) => 935 + 6 * Math.sin((x + 280) / 62);
+  const L3 = Array.from({ length: 43 }, (_, i) => { const x = 40 + 480 * i / 42; return [x, hideY(x)]; });
+  const R3 = Array.from({ length: 10 }, (_, i) => { const x = 960 - 440 * i / 9; return [x, hideY(x)]; });
   const STAGES = [[L0, R0], [L1, R1], [L2, R2], [L3, R3]];
   const DUR = [320, 560, 720];                                // ms per stage transition
   const toD = (pts) => { let d = `M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`; for (let i = 1; i < pts.length; i += 3) d += ` C${pts[i][0].toFixed(1)} ${pts[i][1].toFixed(1)} ${pts[i+1][0].toFixed(1)} ${pts[i+1][1].toFixed(1)} ${pts[i+2][0].toFixed(1)} ${pts[i+2][1].toFixed(1)}`; return d; };
@@ -135,13 +141,14 @@
     cordR.querySelectorAll(':scope > path').forEach(p => p.setAttribute('d', dR));
     const e = L[L.length - 1], s = R[0];
     frayL.setAttribute('transform', `translate(${e[0].toFixed(1)} ${e[1].toFixed(1)})`);
-    frayL.style.opacity = Math.max(0, Math.min(1, 1 - (cordPos - 2.1) * 3));   // the tail end meets the other piece once open
+    frayL.style.opacity = Math.max(0, Math.min(1, 1 - (cordPos - 2.1) * 3));   // the tail end meets the other piece as it slides away
     frayR.setAttribute('transform', `translate(${s[0].toFixed(1)} ${s[1].toFixed(1)})`);
   }
   let cordStage = 0, cordPos = 0;                            // 0 tied … 3 open
   const easeInOut = (t) => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
   function setCord(pos) {                                    // pos 0..3, fractional between stages
     cordPos = pos;
+    scene.classList.toggle('cord-hidden', pos > 2.55);          // past here it is behind the leaf
     const i = Math.min(2, Math.floor(pos)), t = pos - i;
     const [La, Ra] = STAGES[i], [Lb, Rb] = STAGES[i + 1];
     drawCord(mix(La, Lb, t), mix(Ra, Rb, t));
