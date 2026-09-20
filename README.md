@@ -12,12 +12,13 @@ and page-turner:
 
 | Path | Pages |
 | --- | --- |
-| `/reception/` | Reception invite (hosts and names), then date, venue and Reception timing |
-| `/muhurtham-reception/` | Mehendi ceremony, then the wedding invite, then date, venue, Muhurtham and Reception |
-| `/muhurtham-reception-only/` | Wedding invite, then date, venue, Muhurtham and Reception (no Mehendi page) |
-| `/muhurtham/` | Wedding invite, then date, venue and Muhurtham |
+| `/reception-NNNNNNNN/` | Reception invite (hosts and names), then date, venue and Reception timing |
+| `/mehandi-reception-muhurtam-NNNNNNNN/` | Mehendi ceremony, then the wedding invite, then date, venue, Muhurtham and Reception |
+| `/reception-muhurtam-NNNNNNNN/` | Wedding invite, then date, venue, Muhurtham and Reception (no Mehendi page) |
+| `/muhurtam-NNNNNNNN/` | Wedding invite, then date, venue and Muhurtham |
 
-The site root redirects to `/reception/`. Tap the card, use the buttons, arrow keys
+Each route carries a random 8-digit number so the links cannot be guessed; the
+site root and any other address show a plain 404 page (`404.html`). Tap the card, use the buttons, arrow keys
 or a swipe to move between pages; with three pages a row of dots shows where you are.
 
 Every page is the finished artwork placed as-is, so the decorations, the Ganesha
@@ -32,7 +33,7 @@ the top right mutes it; the choice is remembered on that device.
 
 | File | What it is |
 | --- | --- |
-| `index.html` | Redirect to `/reception/` |
+| `404.html` | Shown at the root and at any wrong address |
 | `<route>/index.html` | One per invitation: leaf lobes, the card, the SVG thread and bow, and the list of pages |
 | `styles.css` | Layout, the 3D fold, the untie choreography, responsive sizing |
 | `main.js` | Click/keyboard/swipe handling and the open → turn pages → re-wrap state machine |
