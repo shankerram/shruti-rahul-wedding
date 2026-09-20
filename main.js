@@ -105,7 +105,7 @@
   /* ---------- the cord: one thread, morphed between shapes ----------
      Shapes are point lists (start + 3 per cubic segment) in the tie SVG's coordinates
      (card = 0..1000). Piece L runs from the left band edge, through the knot, both loops
-     and down the tail; piece R from the right band edge into the knot. Stage 0 = tied bow,
+     and down one tail; piece R from the right band edge into the knot and down the other tail. Stage 0 = tied bow,
      1 = knot loosened, 2 = loops pulled through so the cord hangs slack, 3 = lying open on
      the table below the leaf, where the two pieces meet end to end as a single thread. */
   const cordL = document.getElementById('cordL'), cordR = document.getElementById('cordR');
@@ -116,21 +116,22 @@
     [540,440],[600,370],[650,320],  [700,270],[760,280],[750,340],  [740,400],[640,430],[560,460],  [520,475],[490,480],[470,470],   // loop A
     [420,500],[350,560],[310,620],  [270,680],[290,730],[340,700],  [390,670],[420,590],[450,520],  [460,495],[470,480],[472,472],   // loop B
     [495,530],[515,600],[520,700],  [522,760],[540,820],[530,880],  [528,900],[526,920],[524,935]];                                 // tail
-  const R0 = [[1040,468],[900,462],[700,474],[520,470],[505,460],[495,462],[490,470],[488,474],[486,476],[485,478]];
+  const R0 = [[1040,468],[900,462],[700,474],[520,470],[505,460],[495,462],[490,470],[488,474],[486,476],[485,478],
+    [472,530],[455,600],[447,690],  [442,750],[432,810],[442,870],  [444,890],[448,905],[450,918]];                                // second tail
   const scaleAbout = (p, s, dy = 0) => [K + (p[0] - K) * s, KY + (p[1] - KY) * s + dy];
   // stage 1: knot opened, loops slack, tail dropped a little
   const L1 = L0.map((p, i) => i >= 4 && i <= 33 ? scaleAbout(p, 1.22) : i > 33 ? [p[0] + 6, p[1] + 30] : p);
-  const R1 = R0.map((p, i) => i >= 4 ? [p[0] - 10, p[1] + 26] : p);
+  const R1 = R0.map((p, i) => i >= 10 ? [p[0] - 4, p[1] + 30] : i >= 4 ? [p[0] - 10, p[1] + 26] : p);
   // stage 2: loops gone; the freed length hangs as one slack line from the sagging band
   const lerpPts = (a, b, n) => Array.from({ length: n }, (_, i) => { const t = n === 1 ? 0 : i / (n - 1); return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]; });
   const wob = (pts, amp) => pts.map((p, i) => [p[0] + Math.sin(i * 1.7) * amp, p[1] + Math.cos(i * 1.3) * amp * .6]);
   const L2 = [[-20,478],[150,490],[330,512],[452,522], ...wob(lerpPts([462,545],[508,760],30), 3.5), ...lerpPts([520,800],[560,960],9)];
-  const R2 = [[1040,478],[900,490],[700,512],[520,526], ...lerpPts([508,540],[498,600],6)];
+  const R2 = [[1040,478],[900,490],[700,512],[520,526], ...wob(lerpPts([500,540],[458,905],15), 3)];
   // stage 3: slid down inside the card's outline, where it slips behind the leaf (the SVG drops
   // behind the leaf base and fades as it gets there, see .cord-hidden)
   const hideY = (x) => 935 + 6 * Math.sin((x + 280) / 62);
   const L3 = Array.from({ length: 43 }, (_, i) => { const x = 40 + 480 * i / 42; return [x, hideY(x)]; });
-  const R3 = Array.from({ length: 10 }, (_, i) => { const x = 960 - 440 * i / 9; return [x, hideY(x)]; });
+  const R3 = Array.from({ length: 19 }, (_, i) => { const x = 960 - 440 * i / 18; return [x, hideY(x)]; });
   const STAGES = [[L0, R0], [L1, R1], [L2, R2], [L3, R3]];
   const DUR = [320, 560, 720];                                // ms per stage transition
   const toD = (pts) => { let d = `M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`; for (let i = 1; i < pts.length; i += 3) d += ` C${pts[i][0].toFixed(1)} ${pts[i][1].toFixed(1)} ${pts[i+1][0].toFixed(1)} ${pts[i+1][1].toFixed(1)} ${pts[i+2][0].toFixed(1)} ${pts[i+2][1].toFixed(1)}`; return d; };
@@ -139,9 +140,9 @@
     const dL = toD(L), dR = toD(R);
     cordL.querySelectorAll(':scope > path').forEach(p => p.setAttribute('d', dL));
     cordR.querySelectorAll(':scope > path').forEach(p => p.setAttribute('d', dR));
-    const e = L[L.length - 1], s = R[0];
+    const e = L[L.length - 1], s = R[R.length - 1];      // both frayed ends are tail tips
     frayL.setAttribute('transform', `translate(${e[0].toFixed(1)} ${e[1].toFixed(1)})`);
-    frayL.style.opacity = Math.max(0, Math.min(1, 1 - (cordPos - 2.1) * 3));   // the tail end meets the other piece as it slides away
+    frayL.style.opacity = frayR.style.opacity = Math.max(0, Math.min(1, 1 - (cordPos - 2.1) * 3));   // tail ends merge into the line as it slides away
     frayR.setAttribute('transform', `translate(${s[0].toFixed(1)} ${s[1].toFixed(1)})`);
   }
   let cordStage = 0, cordPos = 0;                            // 0 tied … 3 open
