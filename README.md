@@ -55,4 +55,6 @@ add an `<img>` line to the `.pages` list in that route's `index.html`. To add an
 invitation, copy a route folder, point its `.pages` at a new assets folder, and set
 `--ratio` on `.stage` to the artwork's height ÷ width.
 
-The page carries a `noindex` meta tag so the invitation stays out of search results.
+The pages carry a `noindex` meta tag so the invitation stays out of search results, and
+deliberately have no title, description or Open Graph tags, so a pasted link shows no
+preview card in WhatsApp and other chat apps.
