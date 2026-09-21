@@ -13,8 +13,8 @@ and page-turner:
 | Path | Pages |
 | --- | --- |
 | `/reception-NNNNNNNN/` | Reception invite (hosts and names), then date, venue and Reception timing |
-| `/mehandi-reception-muhurtam-NNNNNNNN/` | Mehendi ceremony, then the wedding invite, then date, venue, Muhurtham and Reception |
-| `/reception-muhurtam-NNNNNNNN/` | Wedding invite, then date, venue, Muhurtham and Reception (no Mehendi page) |
+| `/mehandi-muhurtham-reception-NNNNNNNN/` | Mehendi ceremony, then the wedding invite, then date, venue, Muhurtham and Reception |
+| `/muhurtham-reception-NNNNNNNN/` | Wedding invite, then date, venue, Muhurtham and Reception (no Mehendi page) |
 | `/muhurtam-NNNNNNNN/` | Wedding invite, then date, venue and Muhurtham |
 
 Each route carries a random 8-digit number so the links cannot be guessed; the
