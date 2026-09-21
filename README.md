@@ -57,7 +57,7 @@ invitation, copy a route folder, point its `.pages` at a new assets folder, and 
 `--ratio` on `.stage` to the artwork's height ÷ width.
 
 The pages carry a `noindex` meta tag so the invitation stays out of search results, and
-carry a `<title>` and matching `og:title`/`og:url` ("Shruti & Rahul wedding invitation")
+carry a `<title>` and matching `og:title`/`og:url` ("Shruti & Rahul - Wedding Invitation")
 but no description or `og:image`, so a pasted link shows that title in WhatsApp and other
 chat apps without a picture card. WhatsApp caches a preview per URL, so to see a changed
 preview test with a variant such as `?1` appended, or from a chat that never saw the link.
