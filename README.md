@@ -41,6 +41,7 @@ the top right mutes it; the choice is remembered on that device.
 | `assets/<route>/N-still.jpg`, `N-mask.png` | For a page marked `data-sway`: the page with its garlands painted out, and the garlands alone, which `main.js` layers on top and rocks gently |
 | `assets/lobe.webp`, `assets/lobe_r.webp` | Left and right leaf lobes with transparency |
 | `assets/music.m4a`, `assets/music.mp3` | Background music (Seetha Kalyana, guitar/piano/violin), AAC with an MP3 fallback |
+| `assets/reception/music.m4a`, `assets/reception/music.mp3` | Reception-only background music (Sathiya 2.0 refix, 21 s loop); the other routes keep `assets/music.*` |
 | `assets/base.jpg` | Leaf texture that sits under the card |
 
 No build step and no dependencies. Serve the folder from any static host (the pages
