@@ -56,5 +56,6 @@ invitation, copy a route folder, point its `.pages` at a new assets folder, and 
 `--ratio` on `.stage` to the artwork's height ÷ width.
 
 The pages carry a `noindex` meta tag so the invitation stays out of search results, and
-deliberately have no title, description or Open Graph tags, so a pasted link shows no
-preview card in WhatsApp and other chat apps.
+carry only a plain `<title>` ("Shruti & Rahul wedding invitation") with no description or
+Open Graph tags, so a pasted link shows at most that title and no preview card in WhatsApp
+and other chat apps.
