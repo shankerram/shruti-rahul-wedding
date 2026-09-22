@@ -13,7 +13,7 @@ and page-turner:
 | Path | Pages |
 | --- | --- |
 | `/reception-NNNNNNNN/` | Reception invite (hosts and names), then date, venue and Reception timing |
-| `/mehandi-muhurtham-reception-NNNNNNNN/` | Mehendi ceremony, then the wedding invite, then date, venue, Muhurtham and Reception |
+| `/mehendi-muhurtham-reception-NNNNNNNN/` | Mehendi ceremony, then the wedding invite, then date, venue, Muhurtham and Reception |
 | `/muhurtham-reception-NNNNNNNN/` | Wedding invite, then date, venue, Muhurtham and Reception (no Mehendi page) |
 | `/muhurtam-NNNNNNNN/` | Wedding invite, then date, venue and Muhurtham |
 
